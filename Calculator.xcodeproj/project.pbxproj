@@ -459,6 +459,7 @@
 				A1B5DC0D19369ABF004AC763 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		A1B5DC0E19369ABF004AC763 /* Build configuration list for PBXNativeTarget "CalculatorTests" */ = {
 			isa = XCConfigurationList;
@@ -467,6 +468,7 @@
 				A1B5DC1019369ABF004AC763 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

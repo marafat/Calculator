@@ -10,4 +10,10 @@
 
 @interface CalcViewController : UIViewController
 
+@property (copy, nonatomic) NSMutableString *onDisplayValue;
+@property (copy, nonatomic) NSNumber *accumulatorOne;
+@property (copy, nonatomic) NSNumber *accumulatorTwo;
+@property (nonatomic) BOOL isOperationSelected;
+@property (nonatomic) BOOL evaluateWasPressed;
+
 @end
