@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A11F21BC193CB0CC004A39FC /* googleMapViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = A11F21BB193CB0CC004A39FC /* googleMapViewController.m */; };
 		A18AF3A71939137400E44B21 /* GoogleMaps.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A18AF3A61939137400E44B21 /* GoogleMaps.framework */; };
 		A18AF3A91939146100E44B21 /* GoogleMaps.bundle in Resources */ = {isa = PBXBuildFile; fileRef = A18AF3A81939146100E44B21 /* GoogleMaps.bundle */; };
 		A18AF3AC1939156300E44B21 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A18AF3AA1939156300E44B21 /* AVFoundation.framework */; };
@@ -48,6 +49,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A11F21BA193CB0CC004A39FC /* googleMapViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = googleMapViewController.h; sourceTree = "<group>"; };
+		A11F21BB193CB0CC004A39FC /* googleMapViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = googleMapViewController.m; sourceTree = "<group>"; };
 		A18AF3A61939137400E44B21 /* GoogleMaps.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GoogleMaps.framework; sourceTree = "<group>"; };
 		A18AF3A81939146100E44B21 /* GoogleMaps.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = GoogleMaps.bundle; path = GoogleMaps.framework/Versions/A/Resources/GoogleMaps.bundle; sourceTree = "<group>"; };
 		A18AF3AA1939156300E44B21 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -172,6 +175,8 @@
 				A1B5DBEE19369ABF004AC763 /* Main.storyboard */,
 				A1B5DBF119369ABF004AC763 /* CalcViewController.h */,
 				A1B5DBF219369ABF004AC763 /* CalcViewController.m */,
+				A11F21BA193CB0CC004A39FC /* googleMapViewController.h */,
+				A11F21BB193CB0CC004A39FC /* googleMapViewController.m */,
 				A1B5DBF419369ABF004AC763 /* Images.xcassets */,
 				A1B5DBE319369ABF004AC763 /* Supporting Files */,
 			);
@@ -308,6 +313,7 @@
 			files = (
 				A1B5DBE919369ABF004AC763 /* main.m in Sources */,
 				A1B5DBF319369ABF004AC763 /* CalcViewController.m in Sources */,
+				A11F21BC193CB0CC004A39FC /* googleMapViewController.m in Sources */,
 				A1B5DBED19369ABF004AC763 /* CalcAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -8,6 +8,7 @@
 
 #import "CalcViewController.h"
 #import <GoogleMaps/GoogleMaps.h>
+#import "googleMapViewController.h"
 
 @interface CalcViewController ()
 // Class extention section
@@ -30,7 +31,6 @@
 
 - (IBAction)updateDisplay:(id)sender;
 - (IBAction)displayMapView:(id)sender;
-- (IBAction)closeMapView:(id)sender;
 - (void)clearDisplay;
 - (void)clearOperationButton;
 
@@ -244,42 +244,19 @@
     else {
         // Coordinates should be ready in the public properties
         CLLocationCoordinate2D target = CLLocationCoordinate2DMake([self.userLatitude doubleValue], [self.userLongitude doubleValue]);
-        GMSCameraPosition *targetCamera = [GMSCameraPosition cameraWithTarget:target zoom:0];
-        mapView = [GMSMapView mapWithFrame:self.view.bounds camera:targetCamera];
-        [mapView setMyLocationEnabled:NO];
-        
-        // add a back button
-        UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-        [self customizeButton:backButton withTitle:@"Back" withFrame:CGRectMake(20, 20, 50, 30) inUIView:mapView];
-        [backButton addTarget:self action:@selector(closeMapView:) forControlEvents:UIControlEventTouchUpInside];
-        
-        // Add marker
-        GMSMarker *targetMarker = [GMSMarker markerWithPosition:target];
-        targetMarker.title = @"Desired Location";
-        targetMarker.snippet = [[NSString alloc] initWithFormat:@"%f, %f", [self.userLatitude doubleValue], [self.userLongitude doubleValue]];
-        targetMarker.map = mapView;
-        
-        // Switch views
-        basicView = [[UIView alloc] init];
-        basicView = self.view;
-        self.view = mapView;
-        
-        // update zoom level
-        GMSCameraUpdate *zoomOnTarget = [GMSCameraUpdate zoomBy:4];
-        [(GMSMapView*)self.view animateWithCameraUpdate:zoomOnTarget];
-
-        //    [UIView beginAnimations:Nil context:NULL];
-        //    [UIView setAnimationDuration:5.0];
-        //    [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:mapView cache:YES];
-        //    [UIView commitAnimations];
+        googleMapViewController *mapViewController = [[googleMapViewController alloc] initWithNibName:nil bundle:nil];
+        [mapViewController setTarget:target];
+        [mapViewController setModalPresentationStyle:UIModalPresentationFormSheet];
+        [mapViewController setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
+        [self presentViewController:mapViewController animated:YES completion:nil];
 
     }
 }
 
-- (IBAction)closeMapView:(id)sender
-{
-    self.view = basicView;
-}
+//- (IBAction)closeMapView:(id)sender
+//{
+//    self.view = basicView;
+//}
 
 
 // Control and Logic Section
