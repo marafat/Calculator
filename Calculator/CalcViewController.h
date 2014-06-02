@@ -13,9 +13,9 @@
 @property (copy, nonatomic) NSMutableString *onDisplayValue;
 @property (copy, nonatomic) NSNumber *accumulatorOne;
 @property (copy, nonatomic) NSNumber *accumulatorTwo;
-@property (nonatomic) BOOL isOperationSelected;
-@property (nonatomic) BOOL evaluateWasPressed;
 @property (copy, nonatomic) NSNumber *userLatitude;
 @property (copy, nonatomic) NSNumber *userLongitude;
+@property (nonatomic) BOOL isOperationSelected;
+@property (nonatomic) BOOL evaluateWasPressed;
 
 @end

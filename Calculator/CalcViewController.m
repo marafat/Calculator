@@ -21,9 +21,6 @@
     
     UITextField *latitudeTextField;
     UITextField *longitudeTextField;
-    
-    GMSMapView *mapView;
-    UIView *basicView;
 }
 
 // Private properties and actions
@@ -43,7 +40,8 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    
+
+#pragma mark - Desinging the calculator interface
     //Adding the display as a label
     display = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 75.0, 750.0, 100.0)];
     display.backgroundColor = [UIColor blackColor];
@@ -108,7 +106,7 @@
     [numberNine addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:numberNine withTitle:@"9" withFrame:CGRectMake(300.0, 450.0, 70.0, 70.0) inUIView:self.view];
 
-    
+    // Adding operation buttons
     addition = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [addition addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:addition withTitle:@"+" withFrame:CGRectMake(400.0, 730.0, 70.0, 70.0) inUIView:self.view];
@@ -128,14 +126,13 @@
     [division addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:division withTitle:@"/" withFrame:CGRectMake(400.0, 450.0, 70.0, 70.0) inUIView:self.view];
 
-    
+    // Adding other buttons
     UIButton* clear = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [clear addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:clear withTitle:@"CLR" withFrame:CGRectMake(300.0, 730.0, 70.0, 70.0) inUIView:self.view];
     
-    
+#pragma mark - Designing Location Visualization interface
     // Designing "Location visualization" section
-    
     UILabel* latitudeLabel = [[UILabel alloc] init];
     [self customizeLabel:latitudeLabel withText:@"Latitude:" withFrame:CGRectMake(50.0, 280.0, 100.0, 50.0)];
     [self.view addSubview:latitudeLabel];
@@ -195,7 +192,8 @@
     [label setFrame:frame];
 }
 
-// Delegate Methods Section
+#pragma mark - UITextField delegate methods section
+
 - (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
     NSLog(@"textFieldShouldBeginEditing");
     textField.backgroundColor = [UIColor colorWithRed:220.0f/255.0f green:220.0f/255.0f blue:220.0f/255.0f alpha:1.0f];
@@ -234,6 +232,9 @@
     return YES;
 }
 
+#pragma mark - Interface interactions section
+
+// Go button for Location Visualizations
 - (IBAction)displayMapView:(id)sender
 {
     // check if any of the two text boxes is empty and view alert to insert coordinates
@@ -247,20 +248,79 @@
         googleMapViewController *mapViewController = [[googleMapViewController alloc] initWithNibName:nil bundle:nil];
         [mapViewController setTarget:target];
         [mapViewController setModalPresentationStyle:UIModalPresentationFormSheet];
-        [mapViewController setModalTransitionStyle:UIModalTransitionStyleCrossDissolve];
+        [mapViewController setModalTransitionStyle:UIModalTransitionStyleCoverVertical];
         [self presentViewController:mapViewController animated:YES completion:nil];
 
     }
 }
 
-//- (IBAction)closeMapView:(id)sender
-//{
-//    self.view = basicView;
-//}
+// Calculator
+-(void)evaluateAndDisplay {
+    
+    [self clearOperationButton];
+    
+    double result = 0.0;
+    if ([self.operation isEqualToString:@"+"]) {
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 + accu2;
+    }
+    else if ([self.operation isEqualToString:@"-"]){
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 - accu2;
+    }
+    
+    else if ([self.operation isEqualToString:@"x"]){
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 * accu2;
+    }
+    
+    else if ([self.operation isEqualToString:@"/"]){
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 / accu2;
+    }
+    // show the result and put its value in accumulatorOne
+    NSMutableString *ResultedOnDisplayValue = [[NSMutableString alloc] initWithFormat:@"%g", result];
+    self.onDisplayValue = [ResultedOnDisplayValue copy];
+    [display setText:self.onDisplayValue];
+    self.accumulatorOne = [NSNumber numberWithDouble:result];
+    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
+}
 
+- (void)clearDisplay {
+    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
+    self.onDisplayValue = [newOnDisplayValue copy];
+    [display setText:@"0"];
+    self.accumulatorOne = [NSNumber numberWithDouble:0.0];
+    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
+    self.isOperationSelected = NO;
+}
 
-// Control and Logic Section
+- (void)clearDisplayWithoutAccumulator {
+    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
+    self.onDisplayValue = [newOnDisplayValue copy];
+}
 
+- (void)clearOperationButton {
+    if ([self.operation isEqualToString:@"+"]) {
+        [addition setSelected:NO];
+    } else if ([self.operation isEqualToString:@"-"]) {
+        [subtraction setSelected:NO];
+    } else if ([self.operation isEqualToString:@"x"]) {
+        [multiplication setSelected:NO];
+    } else if ([self.operation isEqualToString:@"/"]) {
+        [division setSelected:NO];
+    }
+}
+
+#pragma mark - Calculator Logic
 - (IBAction)updateDisplay:(id)sender {
     NSLog(@"updateDisplay Called");
     
@@ -338,70 +398,4 @@
     NSLog(@"Display Text: %@",[display text]);
     
 }
-
--(void)evaluateAndDisplay {
-    
-    [self clearOperationButton];
-    
-    double result = 0.0;
-    if ([self.operation isEqualToString:@"+"]) {
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 + accu2;
-    }
-    else if ([self.operation isEqualToString:@"-"]){
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 - accu2;
-    }
-    
-    else if ([self.operation isEqualToString:@"x"]){
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 * accu2;
-    }
-    
-    else if ([self.operation isEqualToString:@"/"]){
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 / accu2;
-    }
-    // show the result and put its value in accumulatorOne
-    NSMutableString *ResultedOnDisplayValue = [[NSMutableString alloc] initWithFormat:@"%g", result];
-    self.onDisplayValue = [ResultedOnDisplayValue copy];
-    [display setText:self.onDisplayValue];
-    self.accumulatorOne = [NSNumber numberWithDouble:result];
-    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
-}
-
-- (void)clearDisplay {
-    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
-    self.onDisplayValue = [newOnDisplayValue copy];
-    [display setText:@"0"];
-    self.accumulatorOne = [NSNumber numberWithDouble:0.0];
-    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
-    self.isOperationSelected = NO;
-}
-
-- (void)clearDisplayWithoutAccumulator {
-    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
-    self.onDisplayValue = [newOnDisplayValue copy];
-}
-
-- (void)clearOperationButton {
-    if ([self.operation isEqualToString:@"+"]) {
-        [addition setSelected:NO];
-    } else if ([self.operation isEqualToString:@"-"]) {
-        [subtraction setSelected:NO];
-    } else if ([self.operation isEqualToString:@"x"]) {
-        [multiplication setSelected:NO];
-    } else if ([self.operation isEqualToString:@"/"]) {
-        [division setSelected:NO];
-    }
-}
-
 @end
