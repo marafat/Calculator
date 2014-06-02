@@ -18,6 +18,9 @@
     UIButton *multiplication;
     UIButton *division;
     
+    UITextField *latitudeTextField;
+    UITextField *longitudeTextField;
+    
     GMSMapView *mapView;
     UIView *basicView;
 }
@@ -141,21 +144,23 @@
     [self customizeLabel:longitudeLabel withText:@"Longitude:" withFrame:CGRectMake(335.0, 280.0, 100.0, 50.0)];
     [self.view addSubview:longitudeLabel];
 
-    UITextField* latitudeTextField = [[UITextField alloc] init];
+    latitudeTextField = [[UITextField alloc] init];
     [latitudeTextField setFrame:CGRectMake(160.0, 280.0, 150.0, 50.0)];
     [latitudeTextField setBorderStyle:UITextBorderStyleRoundedRect];
     [latitudeTextField setPlaceholder:@"enter latitude"];
     [latitudeTextField setKeyboardType:UIKeyboardTypeDecimalPad];
+    [latitudeTextField setClearButtonMode:UITextFieldViewModeWhileEditing];
     [latitudeTextField setTag:1];
     [latitudeTextField setReturnKeyType:UIReturnKeyNext];
     [latitudeTextField setDelegate:self];
     [self.view addSubview:latitudeTextField];
     
-    UITextField* longitudeTextField = [[UITextField alloc] init];
+    longitudeTextField = [[UITextField alloc] init];
     [longitudeTextField setFrame:CGRectMake(445.0, 280.0, 150.0, 50.0)];
     [longitudeTextField setBorderStyle:UITextBorderStyleRoundedRect];
     [longitudeTextField setPlaceholder:@"enter longitude"];
     [longitudeTextField setKeyboardType:UIKeyboardTypeDecimalPad];
+    [longitudeTextField setClearButtonMode:UITextFieldViewModeWhileEditing];
     [longitudeTextField setTag:2];
     [longitudeTextField setReturnKeyType:UIReturnKeyGo];
     [longitudeTextField setDelegate:self];
@@ -164,6 +169,9 @@
     UIButton* goButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [self customizeButton:goButton withTitle:@"Go" withFrame:CGRectMake(645.0, 280.0, 70.0, 50.0) inUIView:self.view];
     [goButton addTarget:self action:@selector(displayMapView:) forControlEvents:UIControlEventTouchUpInside];
+    [goButton setBackgroundColor:[UIColor colorWithRed:0.0f/255.0f green:128.0f/255.0f blue:0.0f/255.0f alpha:0.6f]];
+    [goButton setTintColor:[UIColor whiteColor]];
+    [goButton.layer setCornerRadius:10];
     
 }
 
@@ -194,9 +202,6 @@
     return YES;
 }
 
-- (void)textFieldDidBeginEditing:(UITextField *)textField{
-    NSLog(@"textFieldDidBeginEditing");
-}
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField{
     NSLog(@"textFieldShouldEndEditing");
@@ -206,62 +211,77 @@
 
 - (void)textFieldDidEndEditing:(UITextField *)textField{
     NSLog(@"textFieldDidEndEditing");
+    if (textField.tag == 1) {
+        self.userLatitude = [NSNumber numberWithDouble:[textField.text doubleValue]];
+    } else {
+        self.userLongitude = [NSNumber numberWithDouble:[textField.text doubleValue]];
+    }
 }
 
-//- (BOOL)textFieldShouldClear:(UITextField *)textField{
-//    NSLog(@"textFieldShouldClear:");
-//    return YES;
-//}
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     NSLog(@"textFieldShouldReturn:");
     if (textField.tag == 1) {
-        UITextField *longitudeTextField = (UITextField *)[self.view viewWithTag:2];
-        [longitudeTextField becomeFirstResponder];
+        UITextField *longitudeTF = (UITextField *)[self.view viewWithTag:2];
+        [longitudeTF becomeFirstResponder];
     }
     else {
         [textField resignFirstResponder];
-        // TODO: press the button "Go" and view the map
+        
+        //press the button "Go" and view the map
+        [self displayMapView:NULL];
     }
     return YES;
 }
 
 - (IBAction)displayMapView:(id)sender
 {
-//    UIView* mapModalView = [[UIView alloc] initWithFrame:self.view.frame];
-    GMSCameraPosition *camera = [GMSCameraPosition cameraWithLatitude:-33.86 longitude:151.20 zoom:6];
-    mapView = [GMSMapView mapWithFrame:CGRectZero camera:camera];
-    [mapView setMyLocationEnabled:NO];
-    
-    
-    // add a back button
-    UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
-    [self customizeButton:backButton withTitle:@"Back" withFrame:CGRectMake(20, 20, 50, 30) inUIView:mapView];
-    [backButton addTarget:self action:@selector(closeMapView:) forControlEvents:UIControlEventTouchUpInside];
-    
-    
-    
-    basicView = [[UIView alloc] init];
-    basicView = self.view;
-    self.view = mapView;
-//    self.view = basicView;
-//    [self.view addSubview:mapView];
-//    [self.view bringSubviewToFront:mapView];
-//    [mapView setHidden:NO];
-    
-//    [UIView beginAnimations:Nil context:NULL];
-//    [UIView setAnimationDuration:1.0];
-//    [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:mapView cache:YES];
-//    [UIView commitAnimations];
-    
-    
-    
+    // check if any of the two text boxes is empty and view alert to insert coordinates
+    if ([latitudeTextField.text isEqualToString:@""] || [longitudeTextField.text isEqualToString:@""]) {
+        UIAlertView *missingCoordinatesAlert = [[UIAlertView alloc] initWithTitle:@"Incomplete Coordinates" message:@"Please make sure to enter both latitude and longitude." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [missingCoordinatesAlert show];
+    }
+    else {
+        // Coordinates should be ready in the public properties
+        CLLocationCoordinate2D target = CLLocationCoordinate2DMake([self.userLatitude doubleValue], [self.userLongitude doubleValue]);
+        GMSCameraPosition *targetCamera = [GMSCameraPosition cameraWithTarget:target zoom:0];
+        mapView = [GMSMapView mapWithFrame:self.view.bounds camera:targetCamera];
+        [mapView setMyLocationEnabled:NO];
+        
+        // add a back button
+        UIButton *backButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+        [self customizeButton:backButton withTitle:@"Back" withFrame:CGRectMake(20, 20, 50, 30) inUIView:mapView];
+        [backButton addTarget:self action:@selector(closeMapView:) forControlEvents:UIControlEventTouchUpInside];
+        
+        // Add marker
+        GMSMarker *targetMarker = [GMSMarker markerWithPosition:target];
+        targetMarker.title = @"Desired Location";
+        targetMarker.snippet = [[NSString alloc] initWithFormat:@"%f, %f", [self.userLatitude doubleValue], [self.userLongitude doubleValue]];
+        targetMarker.map = mapView;
+        
+        // Switch views
+        basicView = [[UIView alloc] init];
+        basicView = self.view;
+        self.view = mapView;
+        
+        // update zoom level
+        GMSCameraUpdate *zoomOnTarget = [GMSCameraUpdate zoomBy:4];
+        [(GMSMapView*)self.view animateWithCameraUpdate:zoomOnTarget];
+
+        //    [UIView beginAnimations:Nil context:NULL];
+        //    [UIView setAnimationDuration:5.0];
+        //    [UIView setAnimationTransition:UIViewAnimationTransitionCurlUp forView:mapView cache:YES];
+        //    [UIView commitAnimations];
+
+    }
 }
 
 - (IBAction)closeMapView:(id)sender
 {
     self.view = basicView;
 }
+
+
 // Control and Logic Section
 
 - (IBAction)updateDisplay:(id)sender {

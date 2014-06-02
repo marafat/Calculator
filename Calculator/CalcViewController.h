@@ -15,7 +15,7 @@
 @property (copy, nonatomic) NSNumber *accumulatorTwo;
 @property (nonatomic) BOOL isOperationSelected;
 @property (nonatomic) BOOL evaluateWasPressed;
-@property (copy, nonatomic) NSNumber *latitude;
-@property (copy, nonatomic) NSNumber *longitude;
+@property (copy, nonatomic) NSNumber *userLatitude;
+@property (copy, nonatomic) NSNumber *userLongitude;
 
 @end
