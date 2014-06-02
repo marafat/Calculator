@@ -7,11 +7,15 @@
 //
 
 #import "CalcAppDelegate.h"
+#import <GoogleMaps/GoogleMaps.h>
 
 @implementation CalcAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    // insert API Key to use Google Maps API
+    [GMSServices provideAPIKey:@"AIzaSyDKuzaYtTtoxeQfRoPC3w8mc1W2_mt38w4"];
+    
     // Override point for customization after application launch.
     return YES;
 }

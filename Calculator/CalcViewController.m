@@ -7,6 +7,8 @@
 //
 
 #import "CalcViewController.h"
+#import <GoogleMaps/GoogleMaps.h>
+#import "googleMapViewController.h"
 
 @interface CalcViewController ()
 // Class extention section
@@ -16,12 +18,16 @@
     UIButton *subtraction;
     UIButton *multiplication;
     UIButton *division;
+    
+    UITextField *latitudeTextField;
+    UITextField *longitudeTextField;
 }
 
 // Private properties and actions
 @property (strong, nonatomic) NSString *operation;
 
 - (IBAction)updateDisplay:(id)sender;
+- (IBAction)displayMapView:(id)sender;
 - (void)clearDisplay;
 - (void)clearOperationButton;
 
@@ -34,9 +40,10 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-    
+
+#pragma mark - Desinging the calculator interface
     //Adding the display as a label
-    display = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 200.0, 750.0, 100.0)];
+    display = [[UILabel alloc] initWithFrame:CGRectMake(10.0, 75.0, 750.0, 100.0)];
     display.backgroundColor = [UIColor blackColor];
     display.textColor = [UIColor whiteColor];
     display.font = [UIFont systemFontOfSize:50];
@@ -99,7 +106,7 @@
     [numberNine addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:numberNine withTitle:@"9" withFrame:CGRectMake(300.0, 450.0, 70.0, 70.0) inUIView:self.view];
 
-    
+    // Adding operation buttons
     addition = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [addition addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:addition withTitle:@"+" withFrame:CGRectMake(400.0, 730.0, 70.0, 70.0) inUIView:self.view];
@@ -119,11 +126,50 @@
     [division addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:division withTitle:@"/" withFrame:CGRectMake(400.0, 450.0, 70.0, 70.0) inUIView:self.view];
 
-    
+    // Adding other buttons
     UIButton* clear = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     [clear addTarget:self action:@selector(updateDisplay:) forControlEvents:UIControlEventTouchUpInside];
     [self customizeButton:clear withTitle:@"CLR" withFrame:CGRectMake(300.0, 730.0, 70.0, 70.0) inUIView:self.view];
+    
+#pragma mark - Designing Location Visualization interface
+    // Designing "Location visualization" section
+    UILabel* latitudeLabel = [[UILabel alloc] init];
+    [self customizeLabel:latitudeLabel withText:@"Latitude:" withFrame:CGRectMake(50.0, 280.0, 100.0, 50.0)];
+    [self.view addSubview:latitudeLabel];
+    
+    UILabel* longitudeLabel = [[UILabel alloc] init];
+    [self customizeLabel:longitudeLabel withText:@"Longitude:" withFrame:CGRectMake(335.0, 280.0, 100.0, 50.0)];
+    [self.view addSubview:longitudeLabel];
 
+    latitudeTextField = [[UITextField alloc] init];
+    [latitudeTextField setFrame:CGRectMake(160.0, 280.0, 150.0, 50.0)];
+    [latitudeTextField setBorderStyle:UITextBorderStyleRoundedRect];
+    [latitudeTextField setPlaceholder:@"enter latitude"];
+    [latitudeTextField setKeyboardType:UIKeyboardTypeDecimalPad];
+    [latitudeTextField setClearButtonMode:UITextFieldViewModeWhileEditing];
+    [latitudeTextField setTag:1];
+    [latitudeTextField setReturnKeyType:UIReturnKeyNext];
+    [latitudeTextField setDelegate:self];
+    [self.view addSubview:latitudeTextField];
+    
+    longitudeTextField = [[UITextField alloc] init];
+    [longitudeTextField setFrame:CGRectMake(445.0, 280.0, 150.0, 50.0)];
+    [longitudeTextField setBorderStyle:UITextBorderStyleRoundedRect];
+    [longitudeTextField setPlaceholder:@"enter longitude"];
+    [longitudeTextField setKeyboardType:UIKeyboardTypeDecimalPad];
+    [longitudeTextField setClearButtonMode:UITextFieldViewModeWhileEditing];
+    [longitudeTextField setTag:2];
+    [longitudeTextField setReturnKeyType:UIReturnKeyGo];
+    [longitudeTextField setDelegate:self];
+    [self.view addSubview:longitudeTextField];
+    
+    UIButton* goButton = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    [self customizeButton:goButton withTitle:@"Go" withFrame:CGRectMake(645.0, 280.0, 70.0, 50.0) inUIView:self.view];
+    [goButton addTarget:self action:@selector(displayMapView:) forControlEvents:UIControlEventTouchUpInside];
+    [goButton setBackgroundColor:[UIColor colorWithRed:0.0f/255.0f green:128.0f/255.0f blue:0.0f/255.0f alpha:0.6f]];
+    [goButton setTintColor:[UIColor whiteColor]];
+    [goButton.layer setCornerRadius:10];
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -139,6 +185,142 @@
     [view addSubview:button];
 }
 
+- (void)customizeLabel:(UILabel*)label withText:(NSString*)text withFrame:(CGRect)frame
+{
+    [label setText:text];
+    [label setTextAlignment:NSTextAlignmentCenter];
+    [label setFrame:frame];
+}
+
+#pragma mark - UITextField delegate methods section
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField{
+    NSLog(@"textFieldShouldBeginEditing");
+    textField.backgroundColor = [UIColor colorWithRed:220.0f/255.0f green:220.0f/255.0f blue:220.0f/255.0f alpha:1.0f];
+    return YES;
+}
+
+
+- (BOOL)textFieldShouldEndEditing:(UITextField *)textField{
+    NSLog(@"textFieldShouldEndEditing");
+    textField.backgroundColor = [UIColor whiteColor];
+    return YES;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField{
+    NSLog(@"textFieldDidEndEditing");
+    if (textField.tag == 1) {
+        self.userLatitude = [NSNumber numberWithDouble:[textField.text doubleValue]];
+    } else {
+        self.userLongitude = [NSNumber numberWithDouble:[textField.text doubleValue]];
+    }
+}
+
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    NSLog(@"textFieldShouldReturn:");
+    if (textField.tag == 1) {
+        UITextField *longitudeTF = (UITextField *)[self.view viewWithTag:2];
+        [longitudeTF becomeFirstResponder];
+    }
+    else {
+        [textField resignFirstResponder];
+        
+        //press the button "Go" and view the map
+        [self displayMapView:NULL];
+    }
+    return YES;
+}
+
+#pragma mark - Interface interactions section
+
+// Go button for Location Visualizations
+- (IBAction)displayMapView:(id)sender
+{
+    // check if any of the two text boxes is empty and view alert to insert coordinates
+    if ([latitudeTextField.text isEqualToString:@""] || [longitudeTextField.text isEqualToString:@""]) {
+        UIAlertView *missingCoordinatesAlert = [[UIAlertView alloc] initWithTitle:@"Incomplete Coordinates" message:@"Please make sure to enter both latitude and longitude." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [missingCoordinatesAlert show];
+    }
+    else {
+        // Coordinates should be ready in the public properties
+        CLLocationCoordinate2D target = CLLocationCoordinate2DMake([self.userLatitude doubleValue], [self.userLongitude doubleValue]);
+        googleMapViewController *mapViewController = [[googleMapViewController alloc] initWithNibName:nil bundle:nil];
+        [mapViewController setTarget:target];
+        [mapViewController setModalPresentationStyle:UIModalPresentationFormSheet];
+        [mapViewController setModalTransitionStyle:UIModalTransitionStyleCoverVertical];
+        [self presentViewController:mapViewController animated:YES completion:nil];
+
+    }
+}
+
+// Calculator
+-(void)evaluateAndDisplay {
+    
+    [self clearOperationButton];
+    
+    double result = 0.0;
+    if ([self.operation isEqualToString:@"+"]) {
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 + accu2;
+    }
+    else if ([self.operation isEqualToString:@"-"]){
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 - accu2;
+    }
+    
+    else if ([self.operation isEqualToString:@"x"]){
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 * accu2;
+    }
+    
+    else if ([self.operation isEqualToString:@"/"]){
+        double accu1 = [self.accumulatorOne doubleValue];
+        double accu2 = [self.accumulatorTwo doubleValue];
+        
+        result = accu1 / accu2;
+    }
+    // show the result and put its value in accumulatorOne
+    NSMutableString *ResultedOnDisplayValue = [[NSMutableString alloc] initWithFormat:@"%g", result];
+    self.onDisplayValue = [ResultedOnDisplayValue copy];
+    [display setText:self.onDisplayValue];
+    self.accumulatorOne = [NSNumber numberWithDouble:result];
+    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
+}
+
+- (void)clearDisplay {
+    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
+    self.onDisplayValue = [newOnDisplayValue copy];
+    [display setText:@"0"];
+    self.accumulatorOne = [NSNumber numberWithDouble:0.0];
+    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
+    self.isOperationSelected = NO;
+}
+
+- (void)clearDisplayWithoutAccumulator {
+    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
+    self.onDisplayValue = [newOnDisplayValue copy];
+}
+
+- (void)clearOperationButton {
+    if ([self.operation isEqualToString:@"+"]) {
+        [addition setSelected:NO];
+    } else if ([self.operation isEqualToString:@"-"]) {
+        [subtraction setSelected:NO];
+    } else if ([self.operation isEqualToString:@"x"]) {
+        [multiplication setSelected:NO];
+    } else if ([self.operation isEqualToString:@"/"]) {
+        [division setSelected:NO];
+    }
+}
+
+#pragma mark - Calculator Logic
 - (IBAction)updateDisplay:(id)sender {
     NSLog(@"updateDisplay Called");
     
@@ -216,70 +398,4 @@
     NSLog(@"Display Text: %@",[display text]);
     
 }
-
--(void)evaluateAndDisplay {
-    
-    [self clearOperationButton];
-    
-    double result = 0.0;
-    if ([self.operation isEqualToString:@"+"]) {
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 + accu2;
-    }
-    else if ([self.operation isEqualToString:@"-"]){
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 - accu2;
-    }
-    
-    else if ([self.operation isEqualToString:@"x"]){
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 * accu2;
-    }
-    
-    else if ([self.operation isEqualToString:@"/"]){
-        double accu1 = [self.accumulatorOne doubleValue];
-        double accu2 = [self.accumulatorTwo doubleValue];
-        
-        result = accu1 / accu2;
-    }
-    // show the result and put its value in accumulatorOne
-    NSMutableString *ResultedOnDisplayValue = [[NSMutableString alloc] initWithFormat:@"%g", result];
-    self.onDisplayValue = [ResultedOnDisplayValue copy];
-    [display setText:self.onDisplayValue];
-    self.accumulatorOne = [NSNumber numberWithDouble:result];
-    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
-}
-
-- (void)clearDisplay {
-    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
-    self.onDisplayValue = [newOnDisplayValue copy];
-    [display setText:@"0"];
-    self.accumulatorOne = [NSNumber numberWithDouble:0.0];
-    self.accumulatorTwo = [NSNumber numberWithDouble:0.0];
-    self.isOperationSelected = NO;
-}
-
-- (void)clearDisplayWithoutAccumulator {
-    NSMutableString *newOnDisplayValue = [[NSMutableString alloc] initWithFormat:@""];
-    self.onDisplayValue = [newOnDisplayValue copy];
-}
-
-- (void)clearOperationButton {
-    if ([self.operation isEqualToString:@"+"]) {
-        [addition setSelected:NO];
-    } else if ([self.operation isEqualToString:@"-"]) {
-        [subtraction setSelected:NO];
-    } else if ([self.operation isEqualToString:@"x"]) {
-        [multiplication setSelected:NO];
-    } else if ([self.operation isEqualToString:@"/"]) {
-        [division setSelected:NO];
-    }
-}
-
 @end

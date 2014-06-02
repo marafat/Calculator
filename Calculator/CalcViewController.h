@@ -8,11 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CalcViewController : UIViewController
+@interface CalcViewController : UIViewController <UITextFieldDelegate>
 
 @property (copy, nonatomic) NSMutableString *onDisplayValue;
 @property (copy, nonatomic) NSNumber *accumulatorOne;
 @property (copy, nonatomic) NSNumber *accumulatorTwo;
+@property (copy, nonatomic) NSNumber *userLatitude;
+@property (copy, nonatomic) NSNumber *userLongitude;
 @property (nonatomic) BOOL isOperationSelected;
 @property (nonatomic) BOOL evaluateWasPressed;
 
